@@ -4,7 +4,7 @@ from core.cache import Cache
 from core.image_hash import ImageHash
 from core.report import Report
 from core.morocco_detector import MoroccoDetector
-
+from core.product_score import ProductScore
 
 class AIHunterEngine:
 
@@ -54,7 +54,7 @@ class AIHunterEngine:
             "morocco": morocco
 
         }
-
+        result["score"] = ProductScore.calculate(result)
         self.cache.save(
             key,
             result
