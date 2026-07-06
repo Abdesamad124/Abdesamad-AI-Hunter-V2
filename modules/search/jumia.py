@@ -2,109 +2,135 @@ from urllib.parse import quote
 
 from playwright.sync_api import sync_playwright
 
+from core.base_search import BaseSearch
 
-class JumiaSearch:
+
+class JumiaSearch(BaseSearch):
+
+    def __init__(self):
+
+        super().__init__()
 
     def search(self, query):
 
-        with sync_playwright() as p:
+        try:
 
-            browser = p.chromium.launch(
-                headless=True
-            )
+            with sync_playwright() as p:
 
-            page = browser.new_page()
+                browser = p.chromium.launch(
 
-            url = f"https://www.jumia.ma/catalog/?q={quote(query)}"
+                    headless=self.headless
 
-            page.goto(
-                url,
-                wait_until="domcontentloaded"
-            )
+                )
 
-            page.wait_for_timeout(5000)
+                page = browser.new_page()
 
-            products = []
+                page.goto(
 
-            cards = page.locator("article.prd")
+                    f"https://www.jumia.ma/catalog/?q={quote(query)}",
 
-            count = cards.count()
+                    wait_until="domcontentloaded",
 
-            for i in range(min(count, 10)):
+                    timeout=self.timeout * 1000
 
-                card = cards.nth(i)
+                )
 
-                try:
-                    title = card.locator("h3.name").inner_text()
-                except:
-                    title = ""
+                page.wait_for_timeout(4000)
 
-                try:
-                    price = card.locator(".prc").inner_text()
-                except:
-                    price = ""
+                products = []
 
-                try:
-                    link = card.locator("a.core").get_attribute("href")
+                cards = page.locator("article.prd")
 
-                    if not link:
-                        link = card.locator("a").first.get_attribute("href")
+                count = min(
 
-                    if link and not link.startswith("http"):
-                        link = "https://www.jumia.ma" + link
+                    cards.count(),
 
-                except:
-                    link = ""
+                    self.max_results
 
-                try:
-                    image = card.locator("img").get_attribute("data-src")
+                )
 
-                    if not image:
-                        image = card.locator("img").get_attribute("src")
+                for i in range(count):
 
-                except:
-                    image = ""
+                    card = cards.nth(i)
 
-                try:
-                    rating = card.locator(".stars").get_attribute("aria-label")
+                    try:
+                        title = card.locator("h3.name").inner_text()
+                    except:
+                        title = ""
 
-                    if rating is None:
+                    try:
+                        price = card.locator(".prc").inner_text()
+                    except:
+                        price = ""
+
+                    try:
+                        link = card.locator("a.core").get_attribute("href")
+
+                        if link and not link.startswith("http"):
+
+                            link = "https://www.jumia.ma" + link
+
+                    except:
+
+                        link = ""
+
+                    try:
+                        image = card.locator("img").get_attribute("data-src")
+
+                        if not image:
+
+                            image = card.locator("img").get_attribute("src")
+
+                    except:
+
+                        image = ""
+
+                    try:
+                        rating = card.locator(".stars").get_attribute("aria-label") or ""
+
+                    except:
+
                         rating = ""
 
-                except:
-                    rating = ""
+                    try:
+                        reviews = card.locator(".rev").inner_text()
 
-                try:
-                    reviews = card.locator(".rev").inner_text()
-                except:
-                    reviews = ""
+                    except:
 
-                products.append({
+                        reviews = ""
 
-                    "title": title,
+                    products.append({
 
-                    "price": price,
+                        "title": title,
 
-                    "url": link,
+                        "price": price,
 
-                    "image": image,
+                        "url": link,
 
-                    "rating": rating,
+                        "image": image,
 
-                    "reviews": reviews
+                        "rating": rating,
 
-                })
+                        "reviews": reviews
 
-            browser.close()
+                    })
 
-            return {
+                browser.close()
 
-                "platform": "Jumia",
+                return self.success(
 
-                "found": len(products) > 0,
+                    "Jumia",
 
-                "count": len(products),
+                    products=products
 
-                "products": products
+                )
 
-            }
+        except Exception as e:
+
+            return self.failed(
+
+                "Jumia",
+
+                e
+
+            )
