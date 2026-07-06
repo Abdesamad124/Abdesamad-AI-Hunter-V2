@@ -2,6 +2,7 @@ from modules.vision.engine import VisionEngine
 from core.search_engine import SearchEngine
 from core.cache import Cache
 from core.image_hash import ImageHash
+from core.report import Report
 
 
 class AIHunterEngine:
@@ -16,11 +17,11 @@ class AIHunterEngine:
 
     def analyze(self, image_path):
 
-        image_key = ImageHash.generate(image_path)
+        key = ImageHash.generate(image_path)
 
-        if self.cache.exists(image_key):
+        if self.cache.exists(key):
 
-            return self.cache.load(image_key)
+            return self.cache.load(key)
 
         vision = self.vision.detect(image_path)
 
@@ -32,17 +33,27 @@ class AIHunterEngine:
 
         competition = self.search.search(query)
 
+        report = Report.generate(
+
+            vision,
+
+            competition
+
+        )
+
         result = {
 
             "vision": vision,
 
-            "competition": competition
+            "competition": competition,
+
+            "report": report
 
         }
 
         self.cache.save(
 
-            image_key,
+            key,
 
             result
 
