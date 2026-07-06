@@ -2,27 +2,37 @@ from urllib.parse import quote
 
 from playwright.sync_api import sync_playwright
 
+from core.base_search import BaseSearch
 
-class TikTokSearch:
+
+class TikTokSearch(BaseSearch):
+
+    def __init__(self):
+
+        super().__init__()
 
     def search(self, query):
 
-        with sync_playwright() as p:
+        try:
 
-            browser = p.chromium.launch(
-                headless=True
-            )
+            with sync_playwright() as p:
 
-            page = browser.new_page()
+                browser = p.chromium.launch(
 
-            url = f"https://www.tiktok.com/search?q={quote(query)}"
+                    headless=self.headless
 
-            try:
+                )
+
+                page = browser.new_page()
 
                 page.goto(
-                    url,
+
+                    f"https://www.tiktok.com/search?q={quote(query)}",
+
                     wait_until="domcontentloaded",
-                    timeout=30000
+
+                    timeout=self.timeout * 1000
+
                 )
 
                 page.wait_for_timeout(5000)
@@ -31,9 +41,15 @@ class TikTokSearch:
 
                 cards = page.locator("div[data-e2e='search_top-item']")
 
-                count = cards.count()
+                count = min(
 
-                for i in range(min(count, 10)):
+                    cards.count(),
+
+                    self.max_results
+
+                )
+
+                for i in range(count):
 
                     card = cards.nth(i)
 
@@ -61,30 +77,20 @@ class TikTokSearch:
 
                 browser.close()
 
-                return {
+                return self.success(
 
-                    "platform": "TikTok",
+                    "TikTok",
 
-                    "found": len(videos) > 0,
+                    videos=videos
 
-                    "count": len(videos),
+                )
 
-                    "videos": videos
+        except Exception as e:
 
-                }
+            return self.failed(
 
-            except:
+                "TikTok",
 
-                browser.close()
+                e
 
-                return {
-
-                    "platform": "TikTok",
-
-                    "found": False,
-
-                    "count": 0,
-
-                    "videos": []
-
-                }
+            )
