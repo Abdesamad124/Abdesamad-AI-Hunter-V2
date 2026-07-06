@@ -4,26 +4,31 @@ from pathlib import Path
 
 import requests
 
+from core.config import OLLAMA_URL, VISION_MODEL
+
 
 class VisionEngine:
 
-    def __init__(self, model="gemma3:4b"):
+    def __init__(self):
 
-        self.model = model
+        self.url = OLLAMA_URL
 
-        self.url = "http://localhost:11434/api/generate"
+        self.model = VISION_MODEL
 
     def detect(self, image_path):
 
-        image_path = Path(image_path)
+        image = Path(image_path)
 
-        if not image_path.exists():
-            raise FileNotFoundError(image_path)
+        if not image.exists():
 
-        with open(image_path, "rb") as f:
+            raise FileNotFoundError(image)
 
-            image = base64.b64encode(
+        with open(image, "rb") as f:
+
+            image64 = base64.b64encode(
+
                 f.read()
+
             ).decode()
 
         prompt = """
@@ -31,16 +36,33 @@ You are an ecommerce product detector.
 
 Analyze the image.
 
-Return ONLY valid JSON.
+Return ONLY JSON.
 
 Format:
 
 {
-  "product_name":"",
-  "category":"",
-  "keywords":[],
-  "confidence":0
+    "product_name":"",
+    "brand":"",
+    "category":"",
+    "material":"",
+    "color":"",
+    "target":"",
+    "confidence":0,
+    "keywords":[],
+    "search_queries":[]
 }
+
+Rules:
+
+Generate at least 3 search_queries.
+
+Example:
+
+[
+"crochet tote bag",
+"personalized crochet bag",
+"handmade crochet shoulder bag"
+]
 """
 
         payload = {
@@ -49,7 +71,11 @@ Format:
 
             "prompt": prompt,
 
-            "images": [image],
+            "images": [
+
+                image64
+
+            ],
 
             "stream": False
 
@@ -61,40 +87,28 @@ Format:
 
             json=payload,
 
-            timeout=120
+            timeout=180
 
         )
 
-        result = response.json()["response"]
+        result = response.json()["response"].strip()
 
-        try:
+        if result.startswith("```json"):
 
-            cleaned = result.strip()
+            result = result.replace(
 
-            if cleaned.startswith("```json"):
-                cleaned = cleaned.replace(
-                    "```json",
-                    "",
-                    1
-                )
+                "```json",
 
-            if cleaned.endswith("```"):
-                cleaned = cleaned[:-3]
+                ""
 
-            cleaned = cleaned.strip()
+            )
 
-            data = json.loads(cleaned)
+        if result.endswith("```"):
 
-            data["success"] = True
+            result = result[:-3]
 
-            return data
+        data = json.loads(result)
 
-        except Exception:
+        data["success"] = True
 
-            return {
-
-                "success": False,
-
-                "raw": result
-
-            }
+        return data
