@@ -2,65 +2,91 @@ from urllib.parse import quote
 
 from playwright.sync_api import sync_playwright
 
+from core.base_search import BaseSearch
 
-class FacebookSearch:
+
+class FacebookSearch(BaseSearch):
+
+    def __init__(self):
+
+        super().__init__()
 
     def search(self, query):
 
-        with sync_playwright() as p:
+        try:
 
-            browser = p.chromium.launch(
-                headless=True
-            )
+            with sync_playwright() as p:
 
-            page = browser.new_page()
+                browser = p.chromium.launch(
 
-            url = (
-                "https://www.facebook.com/marketplace/search/"
-                f"?query={quote(query)}"
-            )
+                    headless=self.headless
 
-            try:
+                )
+
+                page = browser.new_page()
 
                 page.goto(
-                    url,
+
+                    f"https://www.facebook.com/marketplace/search/?query={quote(query)}",
+
                     wait_until="domcontentloaded",
-                    timeout=30000
+
+                    timeout=self.timeout * 1000
+
                 )
 
                 page.wait_for_timeout(5000)
 
                 products = []
 
-                cards = page.locator("a[href*='/marketplace/item/']")
+                cards = page.locator(
 
-                count = cards.count()
+                    "a[href*='/marketplace/item/']"
+
+                )
+
+                count = min(
+
+                    cards.count(),
+
+                    self.max_results
+
+                )
 
                 seen = set()
 
-                for i in range(min(count, 10)):
+                for i in range(count):
 
                     card = cards.nth(i)
 
                     try:
+
                         href = card.get_attribute("href")
+
+                        if not href:
+
+                            continue
+
+                        if href.startswith("/"):
+
+                            href = "https://www.facebook.com" + href
+
                     except:
-                        continue
 
-                    if not href:
                         continue
-
-                    if href.startswith("/"):
-                        href = "https://www.facebook.com" + href
 
                     if href in seen:
+
                         continue
 
                     seen.add(href)
 
                     try:
+
                         title = card.inner_text().split("\n")[0]
+
                     except:
+
                         title = ""
 
                     products.append({
@@ -73,30 +99,20 @@ class FacebookSearch:
 
                 browser.close()
 
-                return {
+                return self.success(
 
-                    "platform": "Facebook",
+                    "Facebook",
 
-                    "found": len(products) > 0,
+                    products=products
 
-                    "count": len(products),
+                )
 
-                    "products": products
+        except Exception as e:
 
-                }
+            return self.failed(
 
-            except:
+                "Facebook",
 
-                browser.close()
+                e
 
-                return {
-
-                    "platform": "Facebook",
-
-                    "found": False,
-
-                    "count": 0,
-
-                    "products": []
-
-                }
+            )
