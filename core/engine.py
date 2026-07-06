@@ -3,6 +3,7 @@ from core.search_engine import SearchEngine
 from core.cache import Cache
 from core.image_hash import ImageHash
 from core.report import Report
+from core.morocco_detector import MoroccoDetector
 
 
 class AIHunterEngine:
@@ -34,11 +35,12 @@ class AIHunterEngine:
         competition = self.search.search(query)
 
         report = Report.generate(
-
             vision,
-
             competition
+        )
 
+        morocco = MoroccoDetector.detect(
+            competition
         )
 
         result = {
@@ -47,16 +49,15 @@ class AIHunterEngine:
 
             "competition": competition,
 
-            "report": report
+            "report": report,
+
+            "morocco": morocco
 
         }
 
         self.cache.save(
-
             key,
-
             result
-
         )
 
         return result
