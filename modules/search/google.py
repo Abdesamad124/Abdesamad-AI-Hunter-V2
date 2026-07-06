@@ -3,60 +3,87 @@ from urllib.parse import quote
 import requests
 from bs4 import BeautifulSoup
 
+from core.base_search import BaseSearch
+from core.config import USER_AGENT
 
-class GoogleSearch:
+
+class GoogleSearch(BaseSearch):
+
+    def __init__(self):
+
+        super().__init__()
 
     def search(self, query):
 
-        headers = {
+        try:
 
-            "User-Agent": (
-                "Mozilla/5.0 "
-                "(Windows NT 10.0; Win64; x64) "
-                "AppleWebKit/537.36 "
-                "(KHTML, like Gecko) "
-                "Chrome/137.0 Safari/537.36"
+            headers = {
+
+                "User-Agent": USER_AGENT
+
+            }
+
+            url = f"https://www.google.com/search?q={quote(query)}"
+
+            response = requests.get(
+
+                url,
+
+                headers=headers,
+
+                timeout=self.timeout
+
             )
 
-        }
+            soup = BeautifulSoup(
 
-        url = f"https://www.google.com/search?q={quote(query)}"
+                response.text,
 
-        response = requests.get(
+                "lxml"
 
-            url,
+            )
 
-            headers=headers,
+            links = []
 
-            timeout=15
+            for a in soup.select("a"):
 
-        )
+                href = a.get("href")
 
-        soup = BeautifulSoup(response.text, "lxml")
+                if not href:
+                    continue
 
-        links = []
+                if href.startswith("/url?q="):
 
-        for a in soup.select("a"):
+                    href = href.replace(
 
-            href = a.get("href")
+                        "/url?q=",
 
-            if not href:
-                continue
+                        ""
 
-            if href.startswith("/url?q="):
+                    ).split("&")[0]
 
-                href = href.replace("/url?q=", "").split("&")[0]
+                    if href not in links:
 
-                links.append(href)
+                        links.append(href)
 
-        return {
+                if len(links) >= self.max_results:
 
-            "platform": "Google",
+                    break
 
-            "found": len(links) > 0,
+            return self.success(
 
-            "count": len(links),
+                "Google",
 
-            "links": links[:10]
+                links=links
 
-        }
+            )
+
+        except Exception as e:
+
+            return self.failed(
+
+                "Google",
+
+                e
+
+            )
