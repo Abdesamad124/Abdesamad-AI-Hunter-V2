@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Abdesamad AI Hunter V2</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Abdesamad AI Hunter V2</h1>
+
+    <form method="POST" enctype="multipart/form-data">
+
+        <input type="file" name="image" required>
+
+        <button type="submit">
+
+            Analyze Product
+
+        </button>
+
+    </form>
+
+    {% if result %}
+
+    <hr>
+
+    <h2>Vision AI</h2>
+
+    <p><b>Product:</b> {{ result.vision.product_name }}</p>
+
+    <p><b>Category:</b> {{ result.vision.category }}</p>
+
+    <p><b>Confidence:</b> {{ result.vision.confidence }}</p>
+
+    <p><b>Keywords:</b></p>
+
+    <ul>
+
+        {% for k in result.vision.keywords %}
+
+        <li>{{ k }}</li>
+
+        {% endfor %}
+
+    </ul>
+
+    <hr>
+
+    <h2>Morocco Search</h2>
+
+    {% for name,data in result.competition.items() %}
+
+    <div class="card">
+
+        <h3>{{ name|upper }}</h3>
+
+        <p>
+
+            Found:
+
+            {{ data.found }}
+
+        </p>
+
+        <p>
+
+            Count:
+
+            {{ data.count }}
+
+        </p>
+
+        {% if data.products %}
+
+        <ul>
+
+        {% for p in data.products %}
+
+            <li>
+
+                <b>{{ p.title }}</b>
+
+                <br>
+
+                {{ p.price if p.price else "" }}
+
+                <br>
+
+                <a href="{{ p.url }}" target="_blank">
+
+                    Open
+
+                </a>
+
+            </li>
+
+        {% endfor %}
+
+        </ul>
+
+        {% endif %}
+
+        {% if data.links %}
+
+        <ul>
+
+        {% for l in data.links %}
+
+            <li>
+
+                <a href="{{ l }}" target="_blank">
+
+                    {{ l }}
+
+                </a>
+
+            </li>
+
+        {% endfor %}
+
+        </ul>
+
+        {% endif %}
+
+        {% if data.videos %}
+
+        <ul>
+
+        {% for v in data.videos %}
+
+            <li>
+
+                <a href="{{ v.url }}" target="_blank">
+
+                    {{ v.title }}
+
+                </a>
+
+            </li>
+
+        {% endfor %}
+
+        </ul>
+
+        {% endif %}
+
+    </div>
+
+    {% endfor %}
+
+    {% endif %}
+
+</div>
+
+</body>
+
+</html>
