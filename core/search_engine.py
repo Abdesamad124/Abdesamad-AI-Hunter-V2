@@ -8,24 +8,54 @@ class SearchEngine:
 
     def __init__(self):
 
-        self.jumia = JumiaSearch()
+        self.engines = {
 
-        self.google = GoogleSearch()
+            "jumia": JumiaSearch(),
 
-        self.tiktok = TikTokSearch()
+            "google": GoogleSearch(),
 
-        self.facebook = FacebookSearch()
+            "tiktok": TikTokSearch(),
 
-    def search(self, query):
-
-        return {
-
-            "jumia": self.jumia.search(query),
-
-            "google": self.google.search(query),
-
-            "tiktok": self.tiktok.search(query),
-
-            "facebook": self.facebook.search(query)
+            "facebook": FacebookSearch()
 
         }
+
+    def search(self, vision):
+
+        queries = vision.get(
+
+            "search_queries",
+
+            vision.get("keywords", [])
+
+        )
+
+        if not queries:
+
+            queries = [
+
+                vision["product_name"]
+
+            ]
+
+        final = {}
+
+        for name, engine in self.engines.items():
+
+            best = None
+
+            best_count = -1
+
+            for q in queries:
+
+                result = engine.search(q)
+
+                if result["count"] > best_count:
+
+                    best = result
+
+                    best_count = result["count"]
+
+            final[name] = best
+
+        return final

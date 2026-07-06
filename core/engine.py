@@ -32,7 +32,7 @@ class AIHunterEngine:
 
         query = vision["keywords"][0]
 
-        competition = self.search.search(query)
+        competition = self.search.search(vision)
 
         report = Report.generate(
             vision,
