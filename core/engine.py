@@ -1,10 +1,13 @@
 from modules.vision.engine import VisionEngine
+
 from core.search_engine import SearchEngine
 from core.cache import Cache
 from core.image_hash import ImageHash
 from core.report import Report
 from core.morocco_detector import MoroccoDetector
 from core.product_score import ProductScore
+from core.decision_engine import DecisionEngine
+
 
 class AIHunterEngine:
 
@@ -15,6 +18,8 @@ class AIHunterEngine:
         self.search = SearchEngine()
 
         self.cache = Cache()
+
+        self.decision = DecisionEngine()
 
     def analyze(self, image_path):
 
@@ -30,17 +35,28 @@ class AIHunterEngine:
 
             return vision
 
-        query = vision["keywords"][0]
-
         competition = self.search.search(vision)
 
-        report = Report.generate(
+        decision = self.decision.evaluate(
+
             vision,
+
             competition
+
+        )
+
+        report = Report.generate(
+
+            vision,
+
+            competition
+
         )
 
         morocco = MoroccoDetector.detect(
+
             competition
+
         )
 
         result = {
@@ -49,15 +65,22 @@ class AIHunterEngine:
 
             "competition": competition,
 
+            "decision": decision,
+
             "report": report,
 
             "morocco": morocco
 
         }
+
         result["score"] = ProductScore.calculate(result)
+
         self.cache.save(
+
             key,
+
             result
+
         )
 
         return result

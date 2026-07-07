@@ -1,0 +1,22 @@
+2026-07-06 20:12:42,277 | INFO | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2026-07-06 20:12:42,277 | INFO | [33mPress CTRL+C to quit[0m
+2026-07-06 20:12:42,283 | INFO |  * Restarting with stat
+2026-07-06 20:12:43,131 | WARNING |  * Debugger is active!
+2026-07-06 20:12:43,134 | INFO |  * Debugger PIN: 129-631-243
+2026-07-06 20:15:28,855 | INFO |  * Detected change in 'C:\\Users\\ddd\\Music\\Abdesamad-AI-Hunter-V2\\modules\\search\\google_images.py', reloading
+2026-07-06 20:15:29,026 | INFO |  * Restarting with stat
+2026-07-06 20:15:30,411 | WARNING |  * Debugger is active!
+2026-07-06 20:15:30,417 | INFO |  * Debugger PIN: 129-631-243
+2026-07-06 20:16:50,468 | INFO |  * Detected change in 'C:\\Users\\ddd\\Music\\Abdesamad-AI-Hunter-V2\\core\\search_engine.py', reloading
+2026-07-06 20:16:50,691 | INFO |  * Restarting with stat
+2026-07-06 20:16:51,726 | WARNING |  * Debugger is active!
+2026-07-06 20:16:51,729 | INFO |  * Debugger PIN: 129-631-243
+2026-07-06 20:20:25,324 | INFO |  * Detected change in 'C:\\Users\\ddd\\Music\\Abdesamad-AI-Hunter-V2\\core\\search_engine.py', reloading
+2026-07-06 20:20:25,489 | INFO |  * Restarting with stat
+2026-07-06 20:20:26,289 | WARNING |  * Debugger is active!
+2026-07-06 20:20:26,291 | INFO |  * Debugger PIN: 129-631-243
+2026-07-06 20:21:16,069 | INFO |  * Detected change in 'C:\\Users\\ddd\\Music\\Abdesamad-AI-Hunter-V2\\core\\search_engine.py', reloading
+2026-07-06 20:21:16,314 | INFO |  * Restarting with stat
+2026-07-06 20:21:17,072 | WARNING |  * Debugger is active!
+2026-07-06 20:21:17,075 | INFO |  * Debugger PIN: 129-631-243

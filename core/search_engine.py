@@ -2,7 +2,7 @@ from modules.search.jumia import JumiaSearch
 from modules.search.google import GoogleSearch
 from modules.search.tiktok import TikTokSearch
 from modules.search.facebook import FacebookSearch
-
+from modules.search.google_images import GoogleImagesSearch
 
 class SearchEngine:
 
@@ -13,7 +13,7 @@ class SearchEngine:
             "jumia": JumiaSearch(),
 
             "google": GoogleSearch(),
-
+            "google_images": GoogleImagesSearch(),
             "tiktok": TikTokSearch(),
 
             "facebook": FacebookSearch()
